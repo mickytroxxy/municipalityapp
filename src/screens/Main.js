@@ -5,7 +5,8 @@ import ParallaxScrollView from 'react-native-parallax-scroll-view';
 import { AppContext } from "../context/AppContext";
 import * as Animatable from 'react-native-animatable';
 import { LinearGradient } from 'expo-linear-gradient';
-import { FontAwesome, AntDesign, Ionicons, MaterialCommunityIcons, Foundation, MaterialIcons } from "@expo/vector-icons";
+
+import { FontAwesome, AntDesign, Ionicons, MaterialCommunityIcons, Foundation, MaterialIcons, Feather } from "@expo/vector-icons";
 let PARALLAX_HEIGHT = 0;
 const Main = ({navigation}) =>{
     const {height} = Dimensions.get("screen");
@@ -20,6 +21,7 @@ const Main = ({navigation}) =>{
                 fadeOutForeground ={true}
                 showsVerticalScrollIndicator ={false}
                 parallaxHeaderHeight={parallaxH}
+                renderForeground={() => <Foreground navigation={navigation}/>}
                 renderBackground={() => <HeaderSection navigation={navigation}/>}
                 renderContentBackground={() => <BodySection navigation={navigation} />}
             />
@@ -35,13 +37,51 @@ const HeaderSection = () =>{
         </LinearGradient>
     )
 }
+const Foreground = (props) =>{
+    const {navigation} = props;
+    const {fontFamilyObj,accountInfo,setConfirmDialog,appState} = useContext(AppContext);
+    const {logout} = appState;
+    return(
+        <View style={styles.headerStyle}>
+            <TouchableOpacity style={{flex:1}} onPress={()=>{
+                setConfirmDialog({isVisible:true,text:`Would you like to logout? Your phone number and password may be required the next time you sign in.`,okayBtn:'NOT NOW',cancelBtn:'LOGOUT',response:(res) => { 
+                    if(!res){
+                        navigation.navigate('Home')
+                        logout();
+                    }
+                }})
+            }} >
+                <Feather name="lock" size={36} color="tomato"></Feather>
+            </TouchableOpacity>
+            <Text style={{fontFamily:fontFamilyObj && fontFamilyObj.fontBold,color:'#fff',marginTop:10}}>{accountInfo && accountInfo.fname} </Text>
+        </View>
+    )
+}
 const BodySection = (props) =>{
-    const {fontFamilyObj} = useContext(AppContext);
-    const btns = ['Directory','Service Points','Complaints','FAQs','Suppliers Directory','Inbox','Media','My Statements', 'Events']
+    const {fontFamilyObj,showToast} = useContext(AppContext);
+    const btns = ['Directory','Notice Board','Complaints','FAQs','Emergencies','Inbox','Media','My Statements', 'Events']
     const {navigation} = props;
     const on_btn_pressed = btn =>{
         if(btn === 'Directory'){
             navigation.navigate("DirectoryScreen")
+        }else if(btn === 'Notice Board'){
+            navigation.navigate("NoticeBoardScreen")
+        }else if(btn === 'FAQs'){
+            navigation.navigate("FaqScreen")
+        }else if(btn === 'My Statements'){
+            navigation.navigate("Statements")
+        }else if(btn === 'Emergencies'){
+            navigation.navigate("Emergencies")
+        }else if(btn === 'Complaints'){
+            navigation.navigate("Complaints")
+        }else if(btn === 'Media'){
+            navigation.navigate("Media")
+        }else if(btn === 'Inbox'){
+            navigation.navigate("Chat")
+        }else if(btn === 'Events'){
+            navigation.navigate("Events")
+        }else{
+            showToast("We are currently reviewing your app and this feature will be live once approved!")
         }
     }
     return(
@@ -50,9 +90,9 @@ const BodySection = (props) =>{
             <View style={{flexDirection:'row',alignContent:'center',alignItems:'center',display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',flexWrap: 'wrap'}}>
                 {btns.map((btn,i) => {
                     return(
-                        <TouchableOpacity onPress={()=>on_btn_pressed(btn)} key={i} style={{backgroundColor:'#b2e8fa',width:'32%',borderRadius:10,alignContent:'center',alignItems:'center',justifyContent:'center',padding:5,minHeight:120,marginTop:10}}>
+                        <TouchableOpacity onPress={()=>on_btn_pressed(btn)} key={i} style={{backgroundColor:'#5586cc',width:'32%',borderRadius:10,alignContent:'center',alignItems:'center',justifyContent:'center',padding:5,minHeight:120,marginTop:10}}>
                             {render_btn_icons(btn)}
-                            <Text style={{fontFamily:fontFamilyObj.fontBold,color:'#757575',textAlign:'center'}}>{btn}</Text>
+                            <Text style={{fontFamily:fontFamilyObj.fontBold,color:'#fff',textAlign:'center'}}>{btn}</Text>
                         </TouchableOpacity>
                     )
                 })}
@@ -60,21 +100,22 @@ const BodySection = (props) =>{
         </View>
     )
 }
+
 const render_btn_icons = btn =>{
     if(btn === 'Directory'){
         return <AntDesign name='contacts' color='#fff' size={72} />
-    }else if(btn === 'Service Points'){
-        return <Ionicons name='business' color='#fff' size={72} />
+    }else if(btn === 'Notice Board'){
+        return <Ionicons name='book' color='#fff' size={72} />
     }else if(btn === 'Complaints'){
         return <AntDesign name='notification' color='#fff' size={72} />
     }else if(btn === 'FAQs'){
         return <Ionicons name='help-circle' color='#fff' size={72} />
-    }else if(btn === 'Suppliers Directory'){
-        return <MaterialCommunityIcons name='google-my-business' color='#fff' size={72} />
+    }else if(btn === 'Emergencies'){
+        return <FontAwesome name='warning' color='tomato' size={72} />
     }else if(btn === 'Inbox'){
         return <Ionicons name='chatbubble-ellipses-sharp' color='#fff' size={72} />
-    }else if(btn === 'Social Media'){
-        return <Ionicons name='social-dribbble' color='#fff' size={72} />
+    }else if(btn === 'Media'){
+        return <MaterialIcons name='photo-library' color='#fff' size={72} />
     }else if(btn === 'My Statements'){
         return <Foundation name='dollar-bill' color='#fff' size={72} />
     }else if(btn === 'Events'){
@@ -105,4 +146,12 @@ const styles = StyleSheet.create({
         paddingBottom:30,
         marginTop:-30
     },
+    headerStyle:{
+        position:'absolute',
+        top:0,
+        width:'100%',
+        backgroundColor: 'rgba(0, 0, 0, 0.1)', 
+        padding:10,
+        flexDirection:'row'
+    }
 });

@@ -5,22 +5,37 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { AppContext } from "../context/AppContext";
 import AisInput from '../components/forms/AisInput';
 import { FontAwesome } from "@expo/vector-icons";
+import { userLogin } from '../context/Api';
 const inputs = [
   {field:'phoneNumber',icon:{name:'phone',type:'Feather',min:5,color:'#009387'},keyboardType:null,placeholder:'ENTER PHONE NUMBER',color:'#009387'},
   {field:'password',icon:{name:'lock',type:'Feather',color:'#009387',min:6},keyboardType:'numeric',placeholder:'ENTER YOUR PASSWORD',color:'#009387'}
 ]
 export default function Home({navigation}) {
-  const {fontFamilyObj} = useContext(AppContext);
+  const {fontFamilyObj,setAccountInfo,appState,showToast} = useContext(AppContext);
   const [loginTypes,setLoginTypes] = useState([{btnType:'STAFF',selected:true},{btnType:'RESIDENT',selected:false}]);
   const selectedLoginType = loginTypes.filter(item => item.selected === true)[0].btnType;
 
-  const [formData,setFormData] = useState(null);
+  const [formData,setFormData] = useState({phoneNumber:'',password:''});
   const handleChange = (field,value) => setFormData(v =>({...v, [field] : value}));
-
-  const login = () =>{
-    navigation.navigate("Main")
+  const {getUser,saveUser} = appState;
+  const login = () => {
+    userLogin(formData.phoneNumber,formData.password,(response) => {
+      if(response.length > 0){
+        if(saveUser(response[0])){
+          navigation.navigate("Main");
+        }
+      }else{
+        showToast("Invalid login credentials")
+      }
+    })
   }
-
+  React.useEffect(() => {
+    getUser((res) => {
+      if(res){
+        navigation.navigate("Main");
+      }
+    })
+  },[])
   if(fontFamilyObj){
     return (
       <ScrollView style={{backgroundColor:'#e8e9f5'}}>
@@ -54,7 +69,7 @@ export default function Home({navigation}) {
               <FontAwesome name='check-circle' size={120} color="green"></FontAwesome>
             </TouchableOpacity>
           </View>
-
+          <TouchableOpacity style={{marginTop:50}} onPress={()=>navigation.navigate("Register")}><Text style={{fontFamily:fontFamilyObj.fontBold,textAlign:'center',color:'#757575'}}>Don't have an account? Register Now</Text></TouchableOpacity>
         </View>
       </ScrollView>
     );

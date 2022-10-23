@@ -5,7 +5,7 @@ import { AppProvider } from './src/context/AppContext';
 import Navigation from './src/screens/Navigation';
 export default function App() {
   return (
-    <View style={{ flex: 1, marginTop: Platform.OS==='ios'?20:StatusBar.currentHeight }}>
+    <View style={{ flex: 1, marginTop: Platform.OS==='ios'?40:StatusBar.currentHeight }}>
       <StatusBar backgroundColor="#e8e9f5" translucent={false} barStyle="dark-content"/>
       <AppProvider>
         <Navigation/>
